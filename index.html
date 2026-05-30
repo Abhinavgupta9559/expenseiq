@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+  <title>ExpenseIQ – Smart Expense Tracker</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json"/>
+  <meta name="theme-color" content="#f0e040"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="ExpenseIQ"/>
+  <link rel="apple-touch-icon" href="icons/icon-192.png"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png"/>
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png"/>
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Satoshi:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- ========== AUTH SCREEN ========== -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <div class="logo-icon"><i class="fa-solid fa-bolt"></i></div>
+      <span class="logo-text">ExpenseIQ</span>
+    </div>
+    <p class="auth-tagline">Your AI-powered personal finance manager</p>
+
+    <!-- Login Form -->
+    <div id="loginForm">
+      <h2 class="auth-title">Welcome Back 👋</h2>
+      <div class="form-group"><label>Username</label><input type="text" id="loginUser" placeholder="Enter your username"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="loginPass" placeholder="Enter your password"/></div>
+      <button class="btn-submit" onclick="doLogin()"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+      <p class="auth-switch">New user? <a href="#" onclick="showSignup()">Create Account</a></p>
+    </div>
+
+    <!-- Signup Form -->
+    <div id="signupForm" style="display:none">
+      <h2 class="auth-title">Create Account ✨</h2>
+      <div class="form-group"><label>Full Name</label><input type="text" id="signupName" placeholder="e.g. Rahul Sharma"/></div>
+      <div class="form-group"><label>Username</label><input type="text" id="signupUser" placeholder="Choose a username"/></div>
+      <div class="form-group"><label>Password</label><input type="password" id="signupPass" placeholder="Create a password"/></div>
+      <div class="form-group"><label>Confirm Password</label><input type="password" id="signupPass2" placeholder="Re-enter password"/></div>
+      <button class="btn-submit" onclick="doSignup()"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+      <p class="auth-switch">Already have account? <a href="#" onclick="showLogin()">Login</a></p>
+    </div>
+
+    <!-- Setup Form (shown after first signup) -->
+    <div id="setupForm" style="display:none">
+      <h2 class="auth-title">Let's set up your profile 🎯</h2>
+      <p style="color:var(--subtext);font-size:14px;margin-bottom:20px">Hi <strong id="setupNameDisplay"></strong>! Answer a few quick questions so AI can personalize everything for you.</p>
+      <div class="form-group"><label>Your Age</label><input type="number" id="setupAge" placeholder="e.g. 25" min="10" max="100"/></div>
+      <div class="form-group">
+        <label>Occupation</label>
+        <select id="setupOccupation">
+          <option value="">Select...</option>
+          <option value="Student">Student</option>
+          <option value="Salaried Employee">Salaried Employee</option>
+          <option value="Business Owner">Business Owner</option>
+          <option value="Freelancer">Freelancer</option>
+          <option value="Homemaker">Homemaker</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Monthly Income (₹)</label><input type="number" id="setupIncome" placeholder="e.g. 35000" min="0"/></div>
+      <div class="form-group">
+        <label>Primary Savings Goal</label>
+        <select id="setupGoal">
+          <option value="">Select...</option>
+          <option value="Save for emergency fund">Save for emergency fund</option>
+          <option value="Buy a phone or gadget">Buy a phone or gadget</option>
+          <option value="Travel/vacation">Travel/vacation</option>
+          <option value="Buy a vehicle">Buy a vehicle</option>
+          <option value="General savings">General savings</option>
+          <option value="Invest money">Invest money</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>City</label>
+        <input type="text" id="setupCity" placeholder="e.g. Lucknow, Delhi, Mumbai"/>
+      </div>
+      <button class="btn-submit" onclick="completeSetup()"><i class="fa-solid fa-rocket"></i> Start Using ExpenseIQ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="mainApp" style="display:none">
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="logo-icon"><i class="fa-solid fa-bolt"></i></div>
+      <span class="logo-text">ExpenseIQ</span>
+    </div>
+    <nav class="nav">
+      <a href="#" class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-pie"></i><span>Dashboard</span></a>
+      <a href="#" class="nav-item" data-page="transactions"><i class="fa-solid fa-list-ul"></i><span>Transactions</span></a>
+      <a href="#" class="nav-item" data-page="add"><i class="fa-solid fa-plus-circle"></i><span>Add</span></a>
+      <a href="#" class="nav-item" data-page="budget"><i class="fa-solid fa-wallet"></i><span>Budget</span></a>
+      <a href="#" class="nav-item" data-page="goals"><i class="fa-solid fa-bullseye"></i><span>Goals</span></a>
+      <a href="#" class="nav-item" data-page="recurring"><i class="fa-solid fa-rotate"></i><span>Recurring</span></a>
+      <a href="#" class="nav-item" data-page="split"><i class="fa-solid fa-users"></i><span>Split</span></a>
+      <a href="#" class="nav-item" data-page="sms"><i class="fa-solid fa-message"></i><span>SMS Import</span></a>
+      <a href="#" class="nav-item ai-nav" data-page="chatbot"><i class="fa-solid fa-robot"></i><span>AI Chat</span></a>
+      <a href="#" class="nav-item ai-nav" data-page="insights"><i class="fa-solid fa-brain"></i><span>AI Insights</span></a>
+      <a href="#" class="nav-item ai-nav" data-page="predict"><i class="fa-solid fa-crystal-ball"></i><span>Prediction</span></a>
+      <a href="#" class="nav-item" data-page="report"><i class="fa-solid fa-file-chart-column"></i><span>Report</span></a>
+    </nav>
+    <div class="sidebar-footer">
+      <i class="fa-solid fa-moon"></i>
+      <label class="switch"><input type="checkbox" id="darkToggle"/><span class="slider"></span></label>
+      <button class="logout-btn" onclick="doLogout()" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="page active" id="page-dashboard">
+      <div class="page-header">
+        <h1>Dashboard <span class="badge" id="dashMonth"></span></h1>
+        <p id="dashGreeting"></p>
+      </div>
+      <div id="dailyTipBanner" class="tip-banner" style="display:none"></div>
+      <div id="budgetAlertBanner" class="alert-banner" style="display:none"></div>
+      <div class="stats-grid">
+        <div class="stat-card income-card"><div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div><div><p class="stat-label">Total Income</p><h2 class="stat-val" id="totalIncome">₹0</h2></div></div>
+        <div class="stat-card expense-card"><div class="stat-icon"><i class="fa-solid fa-arrow-trend-down"></i></div><div><p class="stat-label">Total Expenses</p><h2 class="stat-val" id="totalExpense">₹0</h2></div></div>
+        <div class="stat-card balance-card"><div class="stat-icon"><i class="fa-solid fa-scale-balanced"></i></div><div><p class="stat-label">Net Balance</p><h2 class="stat-val" id="netBalance">₹0</h2></div></div>
+        <div class="stat-card savings-card"><div class="stat-icon"><i class="fa-solid fa-piggy-bank"></i></div><div><p class="stat-label">Savings Rate</p><h2 class="stat-val" id="savingsRate">0%</h2></div></div>
+      </div>
+      <div class="charts-row">
+        <div class="chart-card"><h3>Spending by Category</h3><canvas id="categoryChart"></canvas><div id="legendContainer" class="legend"></div></div>
+        <div class="chart-card"><h3>Monthly Trend</h3><canvas id="trendChart"></canvas></div>
+      </div>
+      <div class="recent-section"><h3>Recent Transactions</h3><ul id="recentList" class="txn-list"></ul></div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section class="page" id="page-transactions">
+      <div class="page-header">
+        <h1>All Transactions</h1>
+        <div class="filter-bar">
+          <input type="text" id="searchBox" placeholder="🔍 Search..."/>
+          <select id="filterCategory"><option value="all">All Categories</option><option value="Food">Food</option><option value="Transport">Transport</option><option value="Shopping">Shopping</option><option value="Bills">Bills</option><option value="Health">Health</option><option value="Entertainment">Entertainment</option><option value="Education">Education</option><option value="Income">Income</option><option value="Other">Other</option></select>
+          <select id="filterType"><option value="all">All Types</option><option value="expense">Expense</option><option value="income">Income</option></select>
+          <button class="btn-export" onclick="exportCSV()"><i class="fa-solid fa-download"></i> Export CSV</button>
+        </div>
+      </div>
+      <ul id="allTxnList" class="txn-list"></ul>
+    </section>
+
+    <!-- ADD -->
+    <section class="page" id="page-add">
+      <div class="page-header"><h1>Add Transaction</h1><p>Log a new income or expense</p></div>
+      <div class="form-card">
+        <div class="type-toggle">
+          <button class="type-btn active expense-btn" id="btnExpense" onclick="setType('expense')"><i class="fa-solid fa-minus"></i> Expense</button>
+          <button class="type-btn" id="btnIncome" onclick="setType('income')"><i class="fa-solid fa-plus"></i> Income</button>
+        </div>
+        <div class="form-group"><label>Title</label><input type="text" id="txnTitle" placeholder="e.g. Lunch at cafe" oninput="autoDetectCategory(this.value)"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Amount (₹)</label><input type="number" id="txnAmount" placeholder="0.00" min="0"/></div>
+          <div class="form-group"><label>Date</label><input type="date" id="txnDate"/></div>
+        </div>
+        <div class="form-group">
+          <label>Category <span id="autoCatHint" style="color:var(--income);font-size:11px;font-weight:600"></span></label>
+          <select id="txnCategory"><option value="Food">🍔 Food</option><option value="Transport">🚗 Transport</option><option value="Shopping">🛍️ Shopping</option><option value="Bills">💡 Bills</option><option value="Health">💊 Health</option><option value="Entertainment">🎬 Entertainment</option><option value="Education">📚 Education</option><option value="Income">💰 Income</option><option value="Other">📦 Other</option></select>
+        </div>
+        <div class="form-group"><label>Note (optional)</label><textarea id="txnNote" placeholder="Add a note..."></textarea></div>
+        <button class="btn-submit" onclick="addTransaction()"><i class="fa-solid fa-check"></i> Save Transaction</button>
+      </div>
+    </section>
+
+    <!-- BUDGET -->
+    <section class="page" id="page-budget">
+      <div class="page-header"><h1>Budget Planner</h1><p>Set monthly limits per category</p></div>
+      <div id="smartBudgetSuggest" class="tip-banner" style="display:none;margin-bottom:20px"></div>
+      <div id="budgetGrid" class="budget-grid"></div>
+    </section>
+
+    <!-- GOALS -->
+    <section class="page" id="page-goals">
+      <div class="page-header"><h1>Savings Goals</h1><p>Track what you're saving towards</p></div>
+      <div class="form-card" style="margin-bottom:2rem">
+        <h3 style="margin-bottom:1rem">Add New Goal</h3>
+        <div class="form-group"><label>Goal Name</label><input type="text" id="goalName" placeholder="e.g. New Phone, Trip to Goa"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Target Amount (₹)</label><input type="number" id="goalTarget" placeholder="20000" min="1"/></div>
+          <div class="form-group"><label>Deadline</label><input type="date" id="goalDeadline"/></div>
+        </div>
+        <div class="form-group"><label>Saved So Far (₹)</label><input type="number" id="goalSaved" placeholder="0" min="0"/></div>
+        <button class="btn-submit" onclick="addGoal()"><i class="fa-solid fa-bullseye"></i> Add Goal</button>
+      </div>
+      <div id="goalsList"></div>
+    </section>
+
+    <!-- RECURRING -->
+    <section class="page" id="page-recurring">
+      <div class="page-header"><h1>Recurring Transactions</h1><p>Auto-log monthly expenses like rent, EMIs, subscriptions</p></div>
+      <div class="form-card" style="margin-bottom:2rem">
+        <h3 style="margin-bottom:1rem">Add Recurring Expense</h3>
+        <div class="form-group"><label>Title</label><input type="text" id="recTitle" placeholder="e.g. Jio Recharge, Rent, Netflix"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Amount (₹)</label><input type="number" id="recAmount" placeholder="299" min="1"/></div>
+          <div class="form-group"><label>Day of Month</label><input type="number" id="recDay" placeholder="1" min="1" max="28"/></div>
+        </div>
+        <div class="form-group"><label>Category</label><select id="recCategory"><option value="Bills">💡 Bills</option><option value="Food">🍔 Food</option><option value="Transport">🚗 Transport</option><option value="Shopping">🛍️ Shopping</option><option value="Health">💊 Health</option><option value="Entertainment">🎬 Entertainment</option><option value="Education">📚 Education</option><option value="Other">📦 Other</option></select></div>
+        <button class="btn-submit" onclick="addRecurring()"><i class="fa-solid fa-rotate"></i> Save Recurring</button>
+      </div>
+      <div id="recurringList"></div>
+      <div style="margin-top:1.5rem"><button class="btn-export" onclick="processRecurring()"><i class="fa-solid fa-bolt"></i> Process This Month's Recurring</button></div>
+    </section>
+
+    <!-- SPLIT -->
+    <section class="page" id="page-split">
+      <div class="page-header"><h1>Split Expense Tracker</h1><p>Track who owes you in group expenses</p></div>
+      <div class="form-card" style="margin-bottom:2rem">
+        <h3 style="margin-bottom:1rem">Add Split Expense</h3>
+        <div class="form-group"><label>Description</label><input type="text" id="splitDesc" placeholder="e.g. Dinner at Pizza Hut"/></div>
+        <div class="form-row">
+          <div class="form-group"><label>Total Amount (₹)</label><input type="number" id="splitTotal" placeholder="1800" min="1"/></div>
+          <div class="form-group"><label>Date</label><input type="date" id="splitDate"/></div>
+        </div>
+        <div class="form-group"><label>People (comma separated)</label><input type="text" id="splitPeople" placeholder="Rahul, Priya, Amit"/></div>
+        <button class="btn-submit" onclick="addSplit()"><i class="fa-solid fa-users"></i> Add Split</button>
+      </div>
+      <div id="splitList"></div>
+    </section>
+
+    <!-- SMS IMPORT -->
+    <section class="page" id="page-sms">
+      <div class="page-header"><h1>SMS & Receipt Import</h1><p>Auto-extract expenses from SMS or receipt photos</p></div>
+
+      <!-- RECEIPT PHOTO SCANNER -->
+      <div class="form-card" style="margin-bottom:2rem">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="background:#EEEDFE;color:#534AB7;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px"><i class="fa-solid fa-camera"></i></div>
+          <div><h3 style="margin:0">📸 Receipt Photo Scanner</h3><p style="font-size:12px;color:var(--subtext);margin:0">Upload a photo of any bill or receipt</p></div>
+        </div>
+        <p style="font-size:13px;color:var(--subtext);margin-bottom:16px;margin-top:10px">Take a photo of your restaurant bill, shopping receipt, or any payment receipt — AI will read it and auto-fill the expense details.</p>
+        <div class="receipt-upload-zone" id="receiptUploadZone" onclick="document.getElementById('receiptFileInput').click()">
+          <i class="fa-solid fa-cloud-arrow-up" style="font-size:32px;color:var(--muted);margin-bottom:10px;display:block"></i>
+          <p style="font-weight:600;color:var(--text)">Click to upload receipt photo</p>
+          <p style="font-size:12px;color:var(--subtext);margin-top:4px">Supports JPG, PNG, WEBP — max 10MB</p>
+          <input type="file" id="receiptFileInput" accept="image/*" style="display:none" onchange="handleReceiptUpload(this)"/>
+        </div>
+        <div id="receiptPreviewWrap" style="display:none;margin-top:16px">
+          <img id="receiptPreview" style="max-width:100%;max-height:280px;border-radius:12px;object-fit:contain;border:1px solid var(--border)"/>
+          <button class="btn-submit" style="margin-top:14px" onclick="scanReceiptWithAI()"><i class="fa-solid fa-wand-magic-sparkles"></i> Scan & Extract Expense</button>
+        </div>
+        <div id="receiptScanResult" style="margin-top:16px"></div>
+      </div>
+
+      <!-- SMS IMPORT -->
+      <div class="form-card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="background:#E1F5EE;color:#0F6E56;width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px"><i class="fa-solid fa-message"></i></div>
+          <div><h3 style="margin:0">💬 SMS Auto-Import</h3><p style="font-size:12px;color:var(--subtext);margin:0">Paste bank or UPI payment SMS</p></div>
+        </div>
+        <p style="font-size:13px;color:var(--subtext);margin-bottom:16px;margin-top:10px">Copy SMS from PhonePe, Paytm, GPay, HDFC, SBI, ICICI, any bank — paste one or multiple below.</p>
+        <div class="form-group"><label>SMS Text</label><textarea id="smsText" placeholder="Paste your SMS here...&#10;&#10;Example:&#10;Dear Customer, Rs.350 debited from your account via UPI to Swiggy on 26-May-2026&#10;&#10;You can paste multiple SMS at once!" style="min-height:140px"></textarea></div>
+        <button class="btn-submit" onclick="parseSMS()"><i class="fa-solid fa-wand-magic-sparkles"></i> Extract Expenses</button>
+      </div>
+      <div id="smsResults" style="margin-top:1.5rem"></div>
+    </section>
+
+    <!-- AI CHATBOT -->
+    <section class="page" id="page-chatbot">
+      <div class="page-header"><h1><i class="fa-solid fa-robot" style="color:var(--accent)"></i> AI Financial Assistant</h1><p id="chatSubtitle"></p></div>
+      <div class="chatbot-wrap">
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-suggestions" id="chatSuggestions"></div>
+        <div class="chat-input-row">
+          <input type="text" id="chatInput" placeholder="Ask me anything about your finances..." onkeydown="if(event.key==='Enter') sendChat()"/>
+          <button class="chat-send-btn" onclick="sendChat()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI INSIGHTS -->
+    <section class="page" id="page-insights">
+      <div class="page-header"><h1><i class="fa-solid fa-brain" style="color:var(--accent)"></i> AI Spending Insights</h1><p id="insightsSubtitle"></p></div>
+      <div id="insightsContainer"></div>
+    </section>
+
+    <!-- AI PREDICTION -->
+    <section class="page" id="page-predict">
+      <div class="page-header"><h1><i class="fa-solid fa-chart-line" style="color:var(--accent)"></i> Spending Prediction</h1><p id="predictSubtitle"></p></div>
+      <div id="predictContainer"></div>
+    </section>
+
+    <!-- MONTHLY REPORT -->
+    <section class="page" id="page-report">
+      <div class="page-header"><h1>Monthly Report</h1><p>Full financial summary for any month</p></div>
+      <div class="filter-bar" style="margin-bottom:1.5rem">
+        <select id="reportMonth"></select>
+        <button class="btn-submit" style="padding:0.5rem 1.2rem" onclick="generateReport()"><i class="fa-solid fa-chart-line"></i> Generate</button>
+      </div>
+      <div id="reportContainer"></div>
+    </section>
+
+  </main>
+
+  <!-- Android Bottom Navigation -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="bottom-nav-item active" data-page="dashboard" onclick="mobileNav('dashboard',this)"><i class="fa-solid fa-chart-pie"></i><span>Home</span></button>
+    <button class="bottom-nav-item" data-page="transactions" onclick="mobileNav('transactions',this)"><i class="fa-solid fa-list-ul"></i><span>Txns</span></button>
+    <button class="bottom-nav-item" data-page="budget" onclick="mobileNav('budget',this)"><i class="fa-solid fa-wallet"></i><span>Budget</span></button>
+    <button class="bottom-nav-item" data-page="chatbot" onclick="mobileNav('chatbot',this)"><i class="fa-solid fa-robot"></i><span>AI Chat</span></button>
+    <button class="bottom-nav-item" data-page="insights" onclick="mobileNav('insights',this)"><i class="fa-solid fa-brain"></i><span>Insights</span></button>
+  </nav>
+
+  <!-- FAB: Floating Add Button -->
+  <button class="fab-btn" onclick="mobileNav('add', null)" title="Add Expense"><i class="fa-solid fa-plus"></i></button>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<!-- PWA Install Banner -->
+<div id="pwaInstallBanner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#0d0d0d;color:#fff;padding:14px 20px;align-items:center;gap:12px;box-shadow:0 -4px 20px rgba(0,0,0,0.3)">
+  <img src="icons/icon-72.png" style="width:40px;height:40px;border-radius:10px"/>
+  <div style="flex:1">
+    <div style="font-weight:700;font-size:14px">Install ExpenseIQ</div>
+    <div style="font-size:12px;color:#aaa">Add to home screen — use like a real app!</div>
+  </div>
+  <button id="pwaInstallBtn" style="background:#f0e040;color:#000;border:none;padding:9px 18px;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px">Install</button>
+  <button onclick="document.getElementById('pwaInstallBanner').style.display='none'" style="background:none;border:none;color:#aaa;cursor:pointer;font-size:22px;line-height:1">×</button>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="app.js"></script>
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    });
+  }
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault(); deferredPrompt = e;
+    document.getElementById('pwaInstallBanner').style.display = 'flex';
+  });
+  document.getElementById('pwaInstallBtn').addEventListener('click', () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(() => { deferredPrompt = null; document.getElementById('pwaInstallBanner').style.display = 'none'; });
+    }
+  });
+</script>
+</body>
+</html>
